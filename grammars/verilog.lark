@@ -3,10 +3,10 @@
 //1. Source Text
 
 //<source_text>
-start: description*
+?start: description*
 
 //<description>
-description: module
+?description: module
 
 //<module>
 module: "module" name_of_module list_of_ports? ";" module_item* "endmodule"
@@ -21,7 +21,7 @@ list_of_ports: "(" port ("," port)* ")"
 port: IDENTIFIER
 
 //<module_item>
-module_item: input_declaration
+?module_item: input_declaration
     | output_declaration
     | inout_declaration
     | continuous_assign
@@ -38,7 +38,8 @@ output_declaration: "output" range? list_of_variables ";"
 inout_declaration: "inout" range? list_of_variables ";"
 
 //<list_of_variables>
-list_of_variables: NETTYPE drive_strength? expandrange? delay? list_of_assignments ";"
+list_of_variables: name_of_variable ("," name_of_variable)*
+    | NETTYPE drive_strength? expandrange? delay? list_of_assignments ";"
 
 //<NETTYPE>
 NETTYPE: "wire"
@@ -53,20 +54,28 @@ NETTYPE: "wire"
     | "trior"
     | "trireg"
 
+//<expandrange>
+expandrange: range
+    | "scalared" range
+    | "vectored" range
+
 //<continuous_assign>
 continuous_assign: "assign" drive_strength? delay? list_of_assignments ";"
+
+//<name_of_variable>
+name_of_variable: IDENTIFIER
 
 //<drive_strength>
 drive_strength: "(" STRENGTH0 "," STRENGTH1 ")"
     | "(" STRENGTH1 "," STRENGTH0 ")"
 
-//<STRENGTH>
+//<STRENGTH0>
 STRENGTH0: "supply0"
     | "strong0"
     | "pull0"
     | "weak0"
     | "highz0"
-    |
+
 //<STRENGTH1>
 STRENGTH1: "supply1"
     | "strong1"
@@ -77,16 +86,57 @@ STRENGTH1: "supply1"
 //<range>
 range: "[" constant_expression ":" constant_expression "]"
 
+//<list_of_assignments>
+list_of_assignments: assignment ("," assignment)*
+
+//5. Behavioral statements
+
+//<assignment>
+assignment: lvalue "=" expression
+
 //7. Expressions
+
+//<lvalue>
+?lvalue: identifier
 
 //<constant_expression>
 constant_expression: expression
 
 //<expression>
 expression: primary
+    | UNARY_OPERATOR primary
+
+//<UNARY_OPERATOR>
+UNARY_OPERATOR: "+"
+    |"-"
+    |"!"
+    |"~"
+    |"&"
+    |"~&"
+    |"|"
+    |"^|"
+    |"^"
+    |"~^"
 
 //<primary>
-primary: SIGNED_NUMBER
+?primary: number
+    | identifier
+    | identifier "[" expression "]"
+
+
+//<number>
+number: DECIMAL_NUMBER
+
+//<DECIMAL_NUMBER>
+DECIMAL_NUMBER: "0".."9" | "_"
+
+//8. General
+
+//<identifier>
+?identifier: IDENTIFIER ("." IDENTIFIER)*
+
+//<delay>
+delay: number
 
 //LARK
 IDENTIFIER: CNAME
@@ -99,10 +149,10 @@ MULTILINE_COMMENT: /\/\*(\*(?!\/)|[^*])*\*\//
 %import common.CNAME
 %import common.ESCAPED_STRING
 %import common.SIGNED_NUMBER
+%import common.DECI
 %import common.WS
 
 %ignore WS
 %ignore COMMENT
 %ignore MULTILINE_COMMENT
 %ignore NEWLINE
-
