@@ -1,0 +1,108 @@
+//used https://www.verilog.com/VerilogBNF.html as reference, this is Verilog 1995
+
+//1. Source Text
+
+//<source_text>
+start: description*
+
+//<description>
+description: module
+
+//<module>
+module: "module" name_of_module list_of_ports? ";" module_item* "endmodule"
+
+//<name of module>
+name_of_module: IDENTIFIER
+
+//<list_of_ports>
+list_of_ports: "(" port ("," port)* ")"
+
+//<port> simplified for the moment, not according to ref
+port: IDENTIFIER
+
+//<module_item>
+module_item: input_declaration
+    | output_declaration
+    | inout_declaration
+    | continuous_assign
+
+//2. Declarations
+
+//<input_declaration>
+input_declaration: "input" range? list_of_variables ";"
+
+//<output_declaration>
+output_declaration: "output" range? list_of_variables ";"
+
+//<inout_declaration>
+inout_declaration: "inout" range? list_of_variables ";"
+
+//<list_of_variables>
+list_of_variables: NETTYPE drive_strength? expandrange? delay? list_of_assignments ";"
+
+//<NETTYPE>
+NETTYPE: "wire"
+    | "tri"
+    | "tri1"
+    | "supply0"
+    | "wand"
+    | "triand"
+    | "tri0"
+    | "supply1"
+    | "wor"
+    | "trior"
+    | "trireg"
+
+//<continuous_assign>
+continuous_assign: "assign" drive_strength? delay? list_of_assignments ";"
+
+//<drive_strength>
+drive_strength: "(" STRENGTH0 "," STRENGTH1 ")"
+    | "(" STRENGTH1 "," STRENGTH0 ")"
+
+//<STRENGTH>
+STRENGTH0: "supply0"
+    | "strong0"
+    | "pull0"
+    | "weak0"
+    | "highz0"
+    |
+//<STRENGTH1>
+STRENGTH1: "supply1"
+    | "strong1"
+    | "pull1"
+    | "weak1"
+    | "highz1"
+
+//<range>
+range: "[" constant_expression ":" constant_expression "]"
+
+//7. Expressions
+
+//<constant_expression>
+constant_expression: expression
+
+//<expression>
+expression: primary
+
+//<primary>
+primary: SIGNED_NUMBER
+
+//LARK
+IDENTIFIER: CNAME
+    | ESCAPED_IDENTIFIER
+ESCAPED_IDENTIFIER: /\\([^\s]+)/  
+COMMENT: "//" /[^\n]*/ NEWLINE
+NEWLINE: "\n"
+MULTILINE_COMMENT: /\/\*(\*(?!\/)|[^*])*\*\//        
+
+%import common.CNAME
+%import common.ESCAPED_STRING
+%import common.SIGNED_NUMBER
+%import common.WS
+
+%ignore WS
+%ignore COMMENT
+%ignore MULTILINE_COMMENT
+%ignore NEWLINE
+
