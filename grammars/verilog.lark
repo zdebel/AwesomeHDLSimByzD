@@ -38,11 +38,7 @@ output_declaration: "output" range? list_of_variables ";"
 inout_declaration: "inout" range? list_of_variables ";"
 
 //<list_of_variables>
-list_of_variables: name_of_variable ("," name_of_variable)*
-    | NETTYPE drive_strength? expandrange? delay? list_of_assignments ";"
-
-//<name_of_variable>
-name_of_variable: IDENTIFIER
+list_of_variables: NETTYPE drive_strength? expandrange? delay? list_of_assignments ";"
 
 //<NETTYPE>
 NETTYPE: "wire"
@@ -56,11 +52,6 @@ NETTYPE: "wire"
     | "wor"
     | "trior"
     | "trireg"
-
-//<expandrange>
-expandrange: range
-    | "scalared" range
-    | "vectored" range
 
 //<continuous_assign>
 continuous_assign: "assign" drive_strength? delay? list_of_assignments ";"
@@ -86,18 +77,7 @@ STRENGTH1: "supply1"
 //<range>
 range: "[" constant_expression ":" constant_expression "]"
 
-//<list_of_assignments>
-list_of_assignments: assignment ("," assignment)*
-
-//5. Behavioral statements
-
-//<assignment>
-assignment: lvalue "=" expression
-
 //7. Expressions
-
-//<lvalue>
-lvalue: identifier
 
 //<constant_expression>
 constant_expression: expression
@@ -106,21 +86,7 @@ constant_expression: expression
 expression: primary
 
 //<primary>
-primary: number
-
-//<number>
-number: DECIMAL_NUMBER
-
-//<DECIMAL_NUMBER>
-DECIMAL_NUMBER: "0".."9" | "_"
-
-//8. General
-
-//<identifier>
-identifier: IDENTIFIER ("." IDENTIFIER)*
-
-//<delay>
-delay: number
+primary: SIGNED_NUMBER
 
 //LARK
 IDENTIFIER: CNAME
@@ -133,12 +99,10 @@ MULTILINE_COMMENT: /\/\*(\*(?!\/)|[^*])*\*\//
 %import common.CNAME
 %import common.ESCAPED_STRING
 %import common.SIGNED_NUMBER
-%import common.DECI
 %import common.WS
 
 %ignore WS
 %ignore COMMENT
 %ignore MULTILINE_COMMENT
 %ignore NEWLINE
-
 
