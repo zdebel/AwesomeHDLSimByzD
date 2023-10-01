@@ -6,9 +6,14 @@ def parseVerilogTree(tree, level = 0):
     print(tree.data)
     for c in tree.children:
         for i in range(0, level):
-            print('#', end='')
-        if (hasattr(c, 'children')):
+            if i < level - 1:
+                print('#', end='')
+            else:
+                print('#', end=' ')
+        if hasattr(c, 'children'):
             parseVerilogTree(c, level + 1)
+        else:
+            print(c)
 
 
 verilog_grammar = '/home/zdebel/kodasy/AwesomeHDLSimByzD/grammars/verilog2001.lark'
